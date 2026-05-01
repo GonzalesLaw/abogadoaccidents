@@ -10195,5 +10195,741 @@
 })();
 </script>
 
+<!-- ═══════════════════════════════════════════════════════
+     GONZALES LAW CHATBOT — AI Case Intake Assistant
+     Drives engagement, dwell time, calls & form traffic
+═══════════════════════════════════════════════════════ -->
+
+<!-- Chat bubble button -->
+<div id="glc-bubble" onclick="glcToggle()" aria-label="Chat with us — free legal help" role="button" tabindex="0">
+  <div id="glc-bubble-icon">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none">
+      <path d="M12 2C6.48 2 2 6.03 2 11c0 2.61 1.19 4.95 3.07 6.59L4 22l4.82-1.56C10.04 20.78 11 21 12 21c5.52 0 10-4.03 10-9S17.52 2 12 2z" fill="currentColor"/>
+    </svg>
+  </div>
+  <div id="glc-bubble-notify">1</div>
+  <div id="glc-bubble-pulse"></div>
+</div>
+
+<!-- Chat window -->
+<div id="glc-window" role="dialog" aria-modal="true" aria-label="Gonzales Law Offices chat">
+  <!-- Header -->
+  <div id="glc-header">
+    <div id="glc-header-avatar">
+      <img src="photos/atrny.webp" alt="Mark Gonzales, Esq." />
+      <span id="glc-status-dot"></span>
+    </div>
+    <div id="glc-header-info">
+      <div id="glc-header-name">Mark Gonzales, Esq.</div>
+      <div id="glc-header-sub">Car Accident Lawyer · Online Now</div>
+    </div>
+    <button id="glc-close" onclick="glcToggle()" aria-label="Close chat">✕</button>
+  </div>
+
+  <!-- Messages -->
+  <div id="glc-messages"></div>
+
+  <!-- Quick replies -->
+  <div id="glc-replies"></div>
+
+  <!-- Footer -->
+  <div id="glc-footer">
+    <div id="glc-footer-secure">🔒 Confidential · Free Consultation · No Fee Unless We Win</div>
+    <a href="tel:18882322898" id="glc-call-btn">📞 Call Now: 1-888-232-2898</a>
+  </div>
+</div>
+
+<style>
+/* ── Chat Bubble ── */
+#glc-bubble {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 58px;
+  height: 58px;
+  background: linear-gradient(135deg, #d42b2b, #8b1212);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 9998;
+  box-shadow: 0 4px 20px rgba(212,43,43,0.55);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  user-select: none;
+}
+#glc-bubble:hover { transform: scale(1.08); box-shadow: 0 6px 28px rgba(212,43,43,0.7); }
+#glc-bubble-pulse {
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 2px solid rgba(212,43,43,0.5);
+  animation: glc-pulse 2.2s ease-out infinite;
+}
+@keyframes glc-pulse {
+  0%   { transform: scale(1);   opacity: 0.8; }
+  70%  { transform: scale(1.45); opacity: 0; }
+  100% { transform: scale(1.45); opacity: 0; }
+}
+#glc-bubble-notify {
+  position: absolute;
+  top: -4px; right: -4px;
+  background: #37ff87;
+  color: #0a1628;
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px;
+  font-weight: 800;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #090f1e;
+  transition: opacity 0.3s;
+}
+#glc-bubble.glc-open #glc-bubble-notify { opacity: 0; }
+#glc-bubble.glc-open #glc-bubble-icon svg {
+  transform: rotate(90deg);
+}
+#glc-bubble-icon { transition: transform 0.3s; }
+
+/* ── Chat Window ── */
+#glc-window {
+  position: fixed;
+  bottom: 94px;
+  right: 14px;
+  width: 340px;
+  max-height: 540px;
+  background: linear-gradient(180deg, #0d1f3c 0%, #060c1e 100%);
+  border: 1px solid rgba(212,43,43,0.25);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 9999;
+  box-shadow: 0 12px 50px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.06);
+  transform: scale(0.92) translateY(16px);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1), opacity 0.22s ease;
+}
+#glc-window.glc-open {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+  pointer-events: all;
+}
+@media (max-width: 400px) {
+  #glc-window { width: calc(100vw - 20px); right: 10px; bottom: 88px; }
+}
+
+/* ── Header ── */
+#glc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 12px;
+  background: linear-gradient(135deg, rgba(212,43,43,0.18), rgba(212,43,43,0.06));
+  border-bottom: 1px solid rgba(255,255,255,0.07);
+  flex-shrink: 0;
+}
+#glc-header-avatar {
+  position: relative;
+  width: 42px; height: 42px;
+  flex-shrink: 0;
+}
+#glc-header-avatar img {
+  width: 42px; height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(212,43,43,0.5);
+}
+#glc-status-dot {
+  position: absolute;
+  bottom: 1px; right: 1px;
+  width: 11px; height: 11px;
+  background: #37ff87;
+  border-radius: 50%;
+  border: 2px solid #0d1f3c;
+  box-shadow: 0 0 6px rgba(55,255,135,0.6);
+}
+#glc-header-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 14px; font-weight: 700; color: #fff;
+}
+#glc-header-sub {
+  font-family: 'Poppins', sans-serif;
+  font-size: 10px; color: #37ff87; font-weight: 600;
+}
+#glc-header-info { flex: 1; }
+#glc-close {
+  background: none; border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 16px; cursor: pointer;
+  padding: 4px; border-radius: 6px;
+  transition: color 0.2s;
+  line-height: 1;
+}
+#glc-close:hover { color: #fff; }
+
+/* ── Messages ── */
+#glc-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  scroll-behavior: smooth;
+}
+#glc-messages::-webkit-scrollbar { width: 4px; }
+#glc-messages::-webkit-scrollbar-track { background: transparent; }
+#glc-messages::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.12); border-radius: 4px; }
+
+.glc-msg {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+  animation: glc-fadein 0.28s ease;
+}
+@keyframes glc-fadein {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.glc-msg-bot .glc-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  object-fit: cover; flex-shrink: 0;
+  border: 1px solid rgba(212,43,43,0.3);
+}
+.glc-msg-user { flex-direction: row-reverse; }
+.glc-bubble-text {
+  max-width: 80%;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  line-height: 1.55;
+  padding: 10px 13px;
+  border-radius: 14px;
+}
+.glc-msg-bot .glc-bubble-text {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.88);
+  border-bottom-left-radius: 4px;
+}
+.glc-msg-user .glc-bubble-text {
+  background: linear-gradient(135deg, #d42b2b, #9e1c1c);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.glc-typing {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 12px 14px;
+}
+.glc-typing span {
+  width: 7px; height: 7px;
+  background: rgba(255,255,255,0.4);
+  border-radius: 50%;
+  animation: glc-bounce 1.2s ease-in-out infinite;
+}
+.glc-typing span:nth-child(2) { animation-delay: 0.18s; }
+.glc-typing span:nth-child(3) { animation-delay: 0.36s; }
+@keyframes glc-bounce {
+  0%,80%,100% { transform: translateY(0); }
+  40% { transform: translateY(-6px); }
+}
+.glc-link-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #d42b2b, #9e1c1c);
+  border-radius: 100px;
+  padding: 9px 16px;
+  text-decoration: none;
+  box-shadow: 0 3px 12px rgba(212,43,43,0.35);
+  transition: transform 0.2s;
+}
+.glc-link-btn:hover { transform: translateY(-1px); }
+.glc-link-btn-secondary {
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: rgba(255,255,255,0.8);
+  box-shadow: none;
+  margin-left: 8px;
+}
+
+/* ── Quick Replies ── */
+#glc-replies {
+  padding: 6px 12px 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  flex-shrink: 0;
+  min-height: 0;
+  transition: opacity 0.2s;
+}
+.glc-reply-btn {
+  font-family: 'Poppins', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.14);
+  border-radius: 100px;
+  padding: 7px 13px;
+  cursor: pointer;
+  transition: background 0.18s, border-color 0.18s, color 0.18s;
+  white-space: nowrap;
+}
+.glc-reply-btn:hover {
+  background: rgba(212,43,43,0.18);
+  border-color: rgba(212,43,43,0.4);
+  color: #fff;
+}
+
+/* ── Footer ── */
+#glc-footer {
+  border-top: 1px solid rgba(255,255,255,0.07);
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  flex-shrink: 0;
+}
+#glc-footer-secure {
+  font-family: 'Poppins', sans-serif;
+  font-size: 9.5px;
+  color: rgba(255,255,255,0.3);
+  text-align: center;
+}
+#glc-call-btn {
+  display: block;
+  text-align: center;
+  font-family: 'Poppins', sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, #d42b2b, #9e1c1c);
+  border-radius: 10px;
+  padding: 11px;
+  text-decoration: none;
+  letter-spacing: 0.2px;
+  box-shadow: 0 3px 14px rgba(212,43,43,0.4);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+#glc-call-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 5px 20px rgba(212,43,43,0.55);
+}
+</style>
+
+<script>
+(function() {
+
+/* ──────────────────────────────────────────────
+   CONVERSATION FLOW
+   Each node: { msgs[], replies[] }
+   replies: { label, next, userMsg, action }
+────────────────────────────────────────────── */
+var FLOW = {
+
+  start: {
+    msgs: [
+      "👋 Hi! I'm Mark Gonzales — car accident and personal injury attorney in the Inland Empire.",
+      "Were you recently injured in an accident? I can help you understand your rights for FREE. What brings you here today?"
+    ],
+    replies: [
+      { label: "🚗 I was in a car accident",       userMsg: "I was in a car accident",        next: "car_accident" },
+      { label: "🚚 It was a truck accident",        userMsg: "I was hit by a truck",            next: "truck_accident" },
+      { label: "🏍️ Motorcycle accident",           userMsg: "I was in a motorcycle accident",  next: "moto_accident" },
+      { label: "💰 What's my case worth?",          userMsg: "I want to know what my case is worth", next: "case_value" },
+      { label: "⚖️ I have a general question",     userMsg: "I have a general legal question",  next: "general_q" }
+    ]
+  },
+
+  car_accident: {
+    msgs: [
+      "I'm sorry to hear that — let's make sure you get what you deserve. 💪",
+      "Quick question: <strong>were you injured?</strong> Even minor soreness counts — symptoms can worsen in the days after a crash."
+    ],
+    replies: [
+      { label: "Yes, I have injuries",             userMsg: "Yes I have injuries",              next: "injured_yes" },
+      { label: "Not sure yet",                     userMsg: "I'm not sure if I'm injured",      next: "injured_maybe" },
+      { label: "Property damage only",             userMsg: "Just property damage",             next: "property_only" }
+    ]
+  },
+
+  truck_accident: {
+    msgs: [
+      "Truck accidents are among the most serious cases — and most valuable. 🚛",
+      "Commercial trucks carry <strong>$1M+ insurance policies</strong> and involve multiple liable parties. You need an attorney immediately to preserve black box data.",
+      "How long ago did the accident happen?"
+    ],
+    replies: [
+      { label: "Within 24 hours",                  userMsg: "It just happened",                 next: "urgent_call" },
+      { label: "Within the last week",             userMsg: "Within the last week",             next: "injured_yes" },
+      { label: "Several weeks ago",                userMsg: "Several weeks ago",                next: "injured_yes" }
+    ]
+  },
+
+  moto_accident: {
+    msgs: [
+      "Motorcycle accidents often result in serious injuries — and insurance companies unfairly blame riders.",
+      "At Gonzales Law Offices, we have a proven record fighting <strong>insurance company bias</strong> against motorcyclists. You deserve full compensation.",
+      "Are you currently receiving medical treatment?"
+    ],
+    replies: [
+      { label: "Yes, I'm seeing doctors",          userMsg: "Yes, I'm getting medical care",    next: "injured_yes" },
+      { label: "I need to see a doctor",           userMsg: "I need medical help",              next: "need_doctor" },
+      { label: "Just minor injuries",              userMsg: "Minor injuries only",              next: "injured_maybe" }
+    ]
+  },
+
+  case_value: {
+    msgs: [
+      "Great question. In California, your case value includes:",
+      "💊 Medical bills (past + future)\n💼 Lost wages\n😣 Pain and suffering\n🧠 Emotional distress\n🚗 Property damage",
+      "Cases with serious injuries in the Inland Empire can range from <strong>$50,000 to over $1 million+</strong>. Want me to give you a rough estimate?"
+    ],
+    replies: [
+      { label: "🧮 Use the Case Calculator",       userMsg: "Yes, show me the calculator",      next: "show_calc", action: "scroll_calc" },
+      { label: "Talk to a lawyer now",             userMsg: "I want to speak to a lawyer",      next: "get_call" },
+      { label: "I was in a car accident",          userMsg: "I was in a car accident",          next: "car_accident" }
+    ]
+  },
+
+  general_q: {
+    msgs: [
+      "Of course — ask me anything. Most commonly people want to know:"
+    ],
+    replies: [
+      { label: "🕐 How long do I have to file?",  userMsg: "How long do I have to file a claim?", next: "statute" },
+      { label: "💸 Do I pay if I lose?",          userMsg: "Do I pay anything if I lose?",      next: "contingency" },
+      { label: "📋 What do I need to bring?",     userMsg: "What should I bring to a consultation?", next: "what_to_bring" },
+      { label: "📍 Where are your offices?",      userMsg: "Where are your offices?",           next: "offices", action: "scroll_offices" }
+    ]
+  },
+
+  injured_yes: {
+    msgs: [
+      "Given your injuries, you likely have a <strong>strong personal injury claim</strong>.",
+      "Here's what you should NOT do: ❌ Don't give recorded statements to insurance adjusters. They use these against you.",
+      "I offer a <strong>FREE 24/7 case review</strong> — no obligation, and you pay nothing unless we win. Want to talk?"
+    ],
+    replies: [
+      { label: "📞 Call me now",                   userMsg: "I want to call now",               next: "get_call", action: "trigger_call" },
+      { label: "📊 Estimate my case value",        userMsg: "How much is my case worth?",       next: "case_value" },
+      { label: "⏱️ How long do I have?",           userMsg: "How long do I have to file?",      next: "statute" }
+    ]
+  },
+
+  injured_maybe: {
+    msgs: [
+      "Even if you feel okay now, <strong>see a doctor immediately</strong> — whiplash, concussions, and soft tissue injuries often show up 24–72 hours later.",
+      "Delaying treatment can hurt your case AND your health. I can help you find a doctor who works on a lien — <strong>no out-of-pocket costs</strong>.",
+      "Want me to connect you with someone right now?"
+    ],
+    replies: [
+      { label: "📞 Yes, call me",                  userMsg: "Yes, please call me",              next: "get_call", action: "trigger_call" },
+      { label: "📊 Estimate my case",              userMsg: "Show me the case calculator",       next: "show_calc", action: "scroll_calc" },
+      { label: "Learn more first",                 userMsg: "Tell me more",                      next: "injured_yes" }
+    ]
+  },
+
+  property_only: {
+    msgs: [
+      "Even property-damage-only accidents can become injury claims as symptoms emerge days later.",
+      "I recommend you <strong>do not close out your claim early</strong> — insurers rush settlements before you know the full extent of damage.",
+      "Would you like a free consultation to make sure you're protected?"
+    ],
+    replies: [
+      { label: "📞 Free consultation",             userMsg: "Yes, free consultation please",    next: "get_call", action: "trigger_call" },
+      { label: "I'll keep that in mind",           userMsg: "Thanks for the tip",               next: "helpful_end" }
+    ]
+  },
+
+  urgent_call: {
+    msgs: [
+      "⚠️ <strong>This is urgent.</strong> Call us immediately at <strong>1-888-232-2898</strong>.",
+      "In truck accidents, black box data is overwritten within 30 days. We need to send a legal hold notice NOW to preserve the evidence.",
+      "Every hour counts. Please call us directly."
+    ],
+    replies: [
+      { label: "📞 Call 1-888-232-2898 NOW",       userMsg: "Calling now",                      next: "get_call", action: "trigger_call" }
+    ]
+  },
+
+  need_doctor: {
+    msgs: [
+      "We can connect you with <strong>top-rated doctors who work on a lien</strong> — meaning you pay nothing out of pocket until your case settles.",
+      "This includes orthopedic specialists, neurologists, chiropractors, and MRI facilities across the Inland Empire.",
+      "Call us and we'll set this up for you today — completely free."
+    ],
+    replies: [
+      { label: "📞 Get doctor referral",           userMsg: "I need a doctor referral",         next: "get_call", action: "trigger_call" },
+      { label: "Tell me more",                     userMsg: "How does lien work?",               next: "contingency" }
+    ]
+  },
+
+  statute: {
+    msgs: [
+      "In California, you have <strong>2 years</strong> from the date of the accident to file a personal injury claim.",
+      "⚠️ <strong>Important exceptions:</strong> Claims against government entities (city bus, county vehicles) are only <strong>6 months</strong>.",
+      "The clock is ticking — but the good news is consultations are free and fast. Don't wait."
+    ],
+    replies: [
+      { label: "📞 Free case review now",          userMsg: "I want a free case review",        next: "get_call", action: "trigger_call" },
+      { label: "💰 What's my case worth?",         userMsg: "What is my case worth?",           next: "case_value" }
+    ]
+  },
+
+  contingency: {
+    msgs: [
+      "Absolutely nothing — ever. We work on <strong>pure contingency fee</strong>.",
+      "✅ No upfront retainer\n✅ No hourly fees\n✅ No case expenses until we win\n✅ If we lose, you owe us nothing",
+      "This means we only get paid when <em>you</em> get paid. Our incentives are 100% aligned."
+    ],
+    replies: [
+      { label: "📞 Start my free case",            userMsg: "I want to start my case",          next: "get_call", action: "trigger_call" },
+      { label: "📍 Find an office near me",        userMsg: "Where are your offices?",          next: "offices", action: "scroll_offices" }
+    ]
+  },
+
+  what_to_bring: {
+    msgs: [
+      "For your free consultation, bring (if you have them):",
+      "📋 Police/accident report\n📷 Photos from the scene\n🏥 Medical records/bills\n🚗 Insurance info (yours + theirs)\n💼 Pay stubs (for lost wages)",
+      "Don't have everything? <strong>That's okay</strong> — we can get most records ourselves. Just call."
+    ],
+    replies: [
+      { label: "📞 Schedule consultation",         userMsg: "Schedule a consultation",          next: "get_call", action: "trigger_call" },
+      { label: "📍 Office locations",              userMsg: "Where are your offices?",          next: "offices", action: "scroll_offices" }
+    ]
+  },
+
+  offices: {
+    msgs: [
+      "We have <strong>4 offices</strong> across the Inland Empire, all open 24/7:",
+      "📍 <strong>Fontana HQ</strong> — 7337 East Ave, Suite E (92336)\n📍 <strong>San Bernardino</strong> — 2627 S Waterman Ave, Suite D\n📍 <strong>Ontario</strong> — 500 East E Street\n📍 <strong>Rancho Cucamonga</strong> — 12365 Foothill Blvd, Suite 105",
+      "Walk-ins welcome. Se habla español. Which is closest to you?"
+    ],
+    replies: [
+      { label: "📞 Call first",                    userMsg: "I'll call first",                  next: "get_call", action: "trigger_call" },
+      { label: "🗺️ See all offices",               userMsg: "Show me the offices on the page",  next: "helpful_end", action: "scroll_offices" }
+    ]
+  },
+
+  show_calc: {
+    msgs: [
+      "Scrolling you to our free Case Value Calculator now 👇",
+      "Enter your medical bills, lost wages, and injury type to get an instant estimate range."
+    ],
+    replies: [
+      { label: "📞 Talk to a lawyer instead",      userMsg: "I'd rather talk to a lawyer",      next: "get_call", action: "trigger_call" }
+    ]
+  },
+
+  get_call: {
+    msgs: [
+      "Perfect. Call us right now — we answer <strong>24 hours a day, 7 days a week</strong> including weekends and holidays.",
+      "📞 <strong>1-888-232-2898</strong> — FREE consultation, no obligation.",
+      "Or tap the button below. We'll fight to get you <strong>maximum compensation</strong>. 💪"
+    ],
+    replies: [
+      { label: "🔄 Ask another question",          userMsg: "I have another question",          next: "start" }
+    ]
+  },
+
+  helpful_end: {
+    msgs: [
+      "Happy to help! Remember — consultations are always FREE and we never charge unless we win.",
+      "If you ever need us: <strong>1-888-232-2898</strong> · Available 24/7 · Inland Empire &amp; all of SoCal 🌴"
+    ],
+    replies: [
+      { label: "💬 Ask something else",            userMsg: "I have another question",          next: "start" },
+      { label: "📞 Call now",                      userMsg: "I want to call now",               next: "get_call", action: "trigger_call" }
+    ]
+  }
+
+};
+
+/* ──────────────────────────────────────────────
+   ENGINE
+────────────────────────────────────────────── */
+var msgEl    = document.getElementById('glc-messages');
+var repEl    = document.getElementById('glc-replies');
+var bubbleEl = document.getElementById('glc-bubble');
+var winEl    = document.getElementById('glc-window');
+var isOpen   = false;
+var typingEl = null;
+var botAvatar = 'photos/atrny.webp';
+
+function glcToggle() {
+  isOpen = !isOpen;
+  winEl.classList.toggle('glc-open', isOpen);
+  bubbleEl.classList.toggle('glc-open', isOpen);
+  if (isOpen) {
+    // Remove notification dot once opened
+    var dot = document.getElementById('glc-bubble-notify');
+    if (dot) dot.style.opacity = '0';
+    msgEl.scrollTop = msgEl.scrollHeight;
+  }
+}
+window.glcToggle = glcToggle;
+
+function glcAddMsg(text, type) {
+  var wrap = document.createElement('div');
+  wrap.className = 'glc-msg glc-msg-' + type;
+  var bubble = document.createElement('div');
+  bubble.className = 'glc-bubble-text';
+  bubble.innerHTML = text.replace(/\n/g, '<br>');
+  if (type === 'bot') {
+    var avatar = document.createElement('img');
+    avatar.src = botAvatar;
+    avatar.alt = 'Mark Gonzales';
+    avatar.className = 'glc-avatar';
+    wrap.appendChild(avatar);
+  }
+  wrap.appendChild(bubble);
+  msgEl.appendChild(wrap);
+  msgEl.scrollTop = msgEl.scrollHeight;
+  return wrap;
+}
+
+function glcShowTyping() {
+  if (typingEl) typingEl.remove();
+  var wrap = document.createElement('div');
+  wrap.className = 'glc-msg glc-msg-bot';
+  var avatar = document.createElement('img');
+  avatar.src = botAvatar;
+  avatar.alt = '';
+  avatar.className = 'glc-avatar';
+  var dots = document.createElement('div');
+  dots.className = 'glc-bubble-text glc-typing';
+  dots.innerHTML = '<span></span><span></span><span></span>';
+  wrap.appendChild(avatar);
+  wrap.appendChild(dots);
+  msgEl.appendChild(wrap);
+  typingEl = wrap;
+  msgEl.scrollTop = msgEl.scrollHeight;
+}
+
+function glcHideTyping() {
+  if (typingEl) { typingEl.remove(); typingEl = null; }
+}
+
+function glcSetReplies(replies) {
+  repEl.innerHTML = '';
+  replies.forEach(function(r) {
+    var btn = document.createElement('button');
+    btn.className = 'glc-reply-btn';
+    btn.textContent = r.label;
+    btn.onclick = function() { glcHandleReply(r); };
+    repEl.appendChild(btn);
+  });
+}
+
+function glcHandleAction(action) {
+  if (!action) return;
+  if (action === 'trigger_call') {
+    setTimeout(function() { window.location.href = 'tel:18882322898'; }, 1200);
+  } else if (action === 'scroll_calc') {
+    setTimeout(function() {
+      var el = document.getElementById('calc-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 800);
+  } else if (action === 'scroll_offices') {
+    setTimeout(function() {
+      var el = document.getElementById('locations-section');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 800);
+  }
+}
+
+function glcShowNode(nodeId) {
+  var node = FLOW[nodeId];
+  if (!node) return;
+  repEl.innerHTML = '';
+
+  var msgs = node.msgs;
+  var i = 0;
+
+  function showNext() {
+    if (i >= msgs.length) {
+      // Done — show replies
+      setTimeout(function() {
+        // Special: add call button in message for get_call node
+        if (nodeId === 'get_call') {
+          var wrap = document.getElementById('glc-messages').lastElementChild;
+          var callLink = document.createElement('div');
+          callLink.style.marginTop = '10px';
+          callLink.innerHTML = '<a href="tel:18882322898" class="glc-link-btn">📞 Call 1-888-232-2898 FREE</a>';
+          if (wrap) wrap.querySelector('.glc-bubble-text').appendChild(callLink);
+        }
+        glcSetReplies(node.replies);
+      }, 200);
+      return;
+    }
+    glcShowTyping();
+    var delay = Math.min(600 + msgs[i].length * 14, 1800);
+    setTimeout(function() {
+      glcHideTyping();
+      glcAddMsg(msgs[i], 'bot');
+      i++;
+      setTimeout(showNext, 350);
+    }, delay);
+  }
+
+  showNext();
+}
+
+function glcHandleReply(reply) {
+  // Show user message
+  glcAddMsg(reply.userMsg, 'user');
+  repEl.innerHTML = '';
+  // Handle action
+  if (reply.action) glcHandleAction(reply.action);
+  // If action is trigger_call, just show a closing message
+  if (reply.action === 'trigger_call') {
+    setTimeout(function() {
+      glcAddMsg("Connecting you now... 📞 If the call doesn't start automatically, dial <strong>1-888-232-2898</strong>.", 'bot');
+      glcSetReplies([{ label: "💬 Ask another question", userMsg: "I have another question", next: "start" }]);
+    }, 600);
+    return;
+  }
+  // Navigate to next node
+  setTimeout(function() {
+    glcShowNode(reply.next);
+  }, 400);
+}
+
+/* ── Auto-open after 18 seconds if user hasn't opened it ── */
+setTimeout(function() {
+  if (!isOpen && !localStorage.getItem('glcOpened')) {
+    glcToggle();
+    localStorage.setItem('glcOpened', '1');
+  }
+}, 18000);
+
+/* ── Init on DOM ready ── */
+document.addEventListener('DOMContentLoaded', function() {
+  // Start conversation immediately when window opens
+  glcShowNode('start');
+});
+
+// Keyboard: close on Escape
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && isOpen) glcToggle();
+});
+
+})();
+</script>
+
 </body>
 </html>
